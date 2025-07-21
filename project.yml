@@ -1,0 +1,29 @@
+:extension:
+  :executable: .exe
+
+:libraries:
+  :system:
+    - crypto
+
+:paths:
+  :include:
+    - ./Helper/**
+  :source:
+    - ./Helper/**
+  :test:
+    - ./Test/**
+
+:plugins:
+  :enabled:
+    - report_build_warnings_log
+    - report_tests_log_factory
+    - report_tests_pretty_stdout
+
+:project:
+  :build_root: Build
+  :test_file_prefix: test_
+  :which_ceedling: gem
+
+:report_tests_log_factory:
+  :reports:
+    - junit
