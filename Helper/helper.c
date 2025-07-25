@@ -20,6 +20,22 @@
  * Function Definition (Public)
  ****************************************************************************************************/
 
+/*** Convert Byte Array To Hexadecimal String ***/
+char *helper_convertByteArrayToHexString(const uint8_t * const ByteArray, const size_t ByteArrayLength)
+{
+    char *hexString;
+    
+    /*** Convert Byte Array To Hexadecimal String ***/
+    /* Set Up */
+    hexString = malloc(((2 * ByteArrayLength) + 1) * sizeof(*hexString));
+    
+    /* Convert Byte Array To Hexadecimal String */
+    for(size_t i = 0; i < ByteArrayLength; i++)
+        (void)sprintf(&hexString[2 * i], "%02hhX", ByteArray[i]);
+    
+    return hexString;
+}
+
 /*** Convert Hexadecimal String To Byte Array ***/
 size_t helper_convertHexStringToByteArray(const char * const HexString, uint8_t ** const byteArray)
 {
