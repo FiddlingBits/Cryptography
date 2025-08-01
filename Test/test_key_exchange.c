@@ -347,7 +347,7 @@ void test_key_exchange_2(void)
     TEST_ASSERT_EQUAL_UINT(alice.sharedSecretLength, bob.sharedSecretLength);
     TEST_ASSERT_EQUAL_HEX8_ARRAY(alice.sharedSecret, bob.sharedSecret, alice.sharedSecretLength);
     
-    /*** 5. Send/Receive Encrypted Data ***/
+    /*** 5. Create AES Key From Shared Secret; Send/Receive Encrypted Data ***/
     
     /*** Clean Up ***/
     /* Alice */
