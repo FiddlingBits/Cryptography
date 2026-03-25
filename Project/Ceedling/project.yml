@@ -1,0 +1,19 @@
+:libraries:
+  :system:
+    - crypto
+
+:paths:
+  :include:
+    - ./**
+    - ../../Library/Unity/src/**
+  :source:
+    - ./**
+  :test:
+    - +:./**
+    - -:Build/**
+
+:project:
+  :build_root: ./Build/
+  :ceedling_version: 1.0.1
+  :test_file_prefix: test_
+  :which_ceedling: gem
