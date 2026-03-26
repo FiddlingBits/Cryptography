@@ -3,6 +3,8 @@
  ****************************************************************************************************/
 
 #include "helper.h"
+#include <openssl/evp.h>
+#include <openssl/params.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -10,7 +12,13 @@
 #include "unity.h"
 
 /****************************************************************************************************
- * Functions
+ * Function Prototypes
+ ****************************************************************************************************/
+
+static const char *helper_getCommandLineMessageDigestName(const helper_hashAlgorithm_t HashAlgorithm);
+
+/****************************************************************************************************
+ * Function Definitions (Public)
  ****************************************************************************************************/
 
 /*** Convert Buffer to Hex String ***/
@@ -23,6 +31,137 @@ void helper_convertBufferToHexString(const uint8_t * const Buffer, const size_t 
     /* Convert Buffer to Hex String */
     for(i = 0; i < BufferLength; i++)
         (void)sprintf(&hexString[2 * i], "%02X", Buffer[i]);
+}
+
+/*** Get Hash Algorithm Name ***/
+const char *helper_getHashAlgorithmName(const helper_hashAlgorithm_t HashAlgorithm)
+{
+    /*** Get Hash Algorithm Name ***/
+    /* Variables */
+    const char *hashAlgorithmName;
+
+    /* Get Hash Algorithm Name */
+    switch(HashAlgorithm)
+    {
+        case HELPER_HASH_ALGORITHM_SHA_224:
+            hashAlgorithmName = "SHA-224";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_256:
+            hashAlgorithmName = "SHA-256";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_384:
+            hashAlgorithmName = "SHA-384";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_512:
+            hashAlgorithmName = "SHA-512";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_224:
+            hashAlgorithmName = "SHA3-224";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_256:
+            hashAlgorithmName = "SHA3-256";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_384:
+            hashAlgorithmName = "SHA3-384";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_512:
+            hashAlgorithmName = "SHA3-512";
+            break;
+        case HELPER_HASH_ALGORITHM_COUNT:
+        default:
+            TEST_FAIL();
+            break;
+    }
+
+    /* Exit */
+    return hashAlgorithmName;
+}
+
+/*** Get Hash Length ***/
+size_t helper_getHashLength(const helper_hashAlgorithm_t HashAlgorithm)
+{
+    /*** Get Hash Length ***/
+    /* Variables */
+    size_t hashLength;
+
+    /* Get Hash Length */
+    switch(HashAlgorithm)
+    {
+        case HELPER_HASH_ALGORITHM_SHA_224:
+        case HELPER_HASH_ALGORITHM_SHA3_224:
+            hashLength = 28;
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_256:
+        case HELPER_HASH_ALGORITHM_SHA3_256:
+            hashLength = 32;
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_384:
+        case HELPER_HASH_ALGORITHM_SHA3_384:
+            hashLength = 48;
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_512:
+        case HELPER_HASH_ALGORITHM_SHA3_512:
+            hashLength = 64;
+            break;
+        case HELPER_HASH_ALGORITHM_COUNT:
+        default:
+            TEST_FAIL();
+            break;
+    }
+
+    /* Exit */
+    return hashLength;
+}
+
+/*** Get Message Authentication Code Parameters ***/
+void helper_getMacParameters(const EVP_MD *MessageDigest, OSSL_PARAM parameters[2])
+{
+    /*** Get Message Digest Name Parameters ***/
+    parameters[0] = OSSL_PARAM_construct_utf8_string("digest", (char *)EVP_MD_get0_name(MessageDigest), 0);
+    parameters[1] = OSSL_PARAM_construct_end();
+}
+
+/*** Get Message Digest ***/
+const EVP_MD *helper_getMessageDigest(const helper_hashAlgorithm_t HashAlgorithm)
+{
+    /*** Get Message Digest ***/
+    /* Variables */
+    const EVP_MD *messageDigest;
+
+    switch(HashAlgorithm)
+    {
+        case HELPER_HASH_ALGORITHM_SHA_224:
+            messageDigest = EVP_sha224();
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_256:
+            messageDigest = EVP_sha256();
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_384:
+            messageDigest = EVP_sha384();
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_512:
+            messageDigest = EVP_sha512();
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_224:
+            messageDigest = EVP_sha3_224();
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_256:
+            messageDigest = EVP_sha3_256();
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_384:
+            messageDigest = EVP_sha3_384();
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_512:
+            messageDigest = EVP_sha3_512();
+            break;
+        case HELPER_HASH_ALGORITHM_COUNT:
+        default:
+            TEST_FAIL();
+            break;
+    }
+
+    /* Exit */
+    return messageDigest;
 }
 
 /*** Get Random Buffer ***/
@@ -41,40 +180,9 @@ void helper_verifyHash(const uint8_t * const Input, const size_t InputLength, co
     FILE *fp;
 
     /* Set Up */
-    switch(HashAlgorithm)
-    {
-        case HELPER_HASH_ALGORITHM_SHA2_224:
-            algorithmString = "sha224";
-            break;
-        case HELPER_HASH_ALGORITHM_SHA2_256:
-            algorithmString = "sha256";
-            break;
-        case HELPER_HASH_ALGORITHM_SHA2_384:
-            algorithmString = "sha384";
-            break;
-        case HELPER_HASH_ALGORITHM_SHA2_512:
-            algorithmString = "sha512";
-            break;
-        case HELPER_HASH_ALGORITHM_SHA3_224:
-            algorithmString = "sha3-224";
-            break;
-        case HELPER_HASH_ALGORITHM_SHA3_256:
-            algorithmString = "sha3-256";
-            break;
-        case HELPER_HASH_ALGORITHM_SHA3_384:
-            algorithmString = "sha3-384";
-            break;
-        case HELPER_HASH_ALGORITHM_SHA3_512:
-            algorithmString = "sha3-512";
-            break;
-        case HELPER_HASH_ALGORITHM_COUNT:
-        default:
-            TEST_FAIL();
-            break;
-    }
     helper_convertBufferToHexString(ExpectedHash, ExpectedHashLength, expectedHashString);
     helper_convertBufferToHexString(Input, InputLength, inputString);
-    (void)sprintf(command, "echo -n \"%s\" | xxd -r -p | openssl dgst -%s -binary | xxd -p -c 256 | tr '[:lower:]' '[:upper:]'", inputString, algorithmString);
+    (void)sprintf(command, "echo -n \"%s\" | xxd -r -p | openssl dgst -%s -binary | xxd -p -c 256 | tr '[:lower:]' '[:upper:]'", inputString, helper_getCommandLineMessageDigestName(HashAlgorithm));
 
     /* Send Command */
     fp = popen(command, "r");
@@ -84,4 +192,76 @@ void helper_verifyHash(const uint8_t * const Input, const size_t InputLength, co
 
     /* Verify */
     TEST_ASSERT_EQUAL_STRING(expectedHashString, actualHashString);
+}
+
+/*** Verify HMAC ***/
+void helper_verifyHmac(const uint8_t * const Input, const size_t InputLength, const uint8_t * const Key, const size_t KeyLength, const helper_hashAlgorithm_t HashAlgorithm, const uint8_t * const ExpectedHmac, const size_t ExpectedHmacLength)
+{
+    /*** Verify HMAC ***/
+    /* Variables */
+    char actualHmacString[500], command[500], expectedHmacString[500], inputString[500], keyString[500];
+    FILE *fp;
+
+    /* Set Up */
+    helper_convertBufferToHexString(ExpectedHmac, ExpectedHmacLength, expectedHmacString);
+    helper_convertBufferToHexString(Input, InputLength, inputString);
+    helper_convertBufferToHexString(Key, KeyLength, keyString);
+    (void)sprintf(command, "echo -n \"%s\" | xxd -r -p | openssl dgst -%s -mac hmac -macopt hexkey:%s -binary | xxd -p -c 256 | tr '[:lower:]' '[:upper:]'", inputString, helper_getCommandLineMessageDigestName(HashAlgorithm), keyString);
+
+    /* Send Command */
+    fp = popen(command, "r");
+    (void)fgets(actualHmacString, sizeof(actualHmacString), fp);
+    actualHmacString[strcspn(actualHmacString, "\n")] = '\0';
+    (void)pclose(fp);
+
+    /* Verify */
+    TEST_ASSERT_EQUAL_STRING(expectedHmacString, actualHmacString);
+}
+
+/****************************************************************************************************
+ * Function Definitions (Private)
+ ****************************************************************************************************/
+
+/*** Get Command Line Message Digest Name ***/
+static const char *helper_getCommandLineMessageDigestName(const helper_hashAlgorithm_t HashAlgorithm)
+{
+    /*** Get Command Line Message Digest Name ***/
+    /* Variables */
+    const char *messageDigestName;
+
+    /* Get Command Line Message Digest Name */
+    switch(HashAlgorithm)
+    {
+        case HELPER_HASH_ALGORITHM_SHA_224:
+            messageDigestName = "sha224";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_256:
+            messageDigestName = "sha256";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_384:
+            messageDigestName = "sha384";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA_512:
+            messageDigestName = "sha512";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_224:
+            messageDigestName = "sha3-224";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_256:
+            messageDigestName = "sha3-256";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_384:
+            messageDigestName = "sha3-384";
+            break;
+        case HELPER_HASH_ALGORITHM_SHA3_512:
+            messageDigestName = "sha3-512";
+            break;
+        case HELPER_HASH_ALGORITHM_COUNT:
+        default:
+            TEST_FAIL();
+            break;
+    }
+
+    /* Exit */
+    return messageDigestName;
 }
